@@ -1,0 +1,13 @@
+# Aegis API → SigNoz Cloud (no local SigNoz network required)
+services:
+  api:
+    build: .
+    container_name: aegis
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - ENV=local
+      - OTEL_SERVICE_NAME=aegis
+    restart: unless-stopped
