@@ -59,8 +59,16 @@ async def complete(prompt: str, *, system: Optional[str] = None) -> LLMResponse:
 
 
 async def _gemini(prompt: str, *, system: Optional[str] = None) -> LLMResponse:
-    model = settings.DEFAULT_MODEL or "gemini-2.0-flash"
-    url = f"{settings.GEMINI_BASE_URL.rstrip('/')}/models/{model}:generateContent"
+    primary = settings.DEFAULT_MODEL or "gemini-2.5-flash"
+    fallback = settings.FALLBACK_MODEL or "gemini-flash-latest"
+    models = [primary]
+    if fallback and fallback != primary:
+        models.append(fallback)
+    # Hard safety net when Google retires the configured model id.
+    for safety in ("gemini-2.5-flash", "gemini-flash-latest"):
+        if safety not in models:
+            models.append(safety)
+
     body = {
         "contents": [{"role": "user", "parts": [{"text": prompt}]}],
         "generationConfig": {
@@ -72,22 +80,54 @@ async def _gemini(prompt: str, *, system: Optional[str] = None) -> LLMResponse:
     if system:
         body["systemInstruction"] = {"parts": [{"text": system}]}
     params = {"key": settings.GEMINI_API_KEY}
+    last_error: Optional[Exception] = None
     async with httpx.AsyncClient(timeout=settings.LLM_TIMEOUT_SECONDS) as client:
-        resp = await client.post(url, params=params, json=body)
-        if resp.status_code >= 400:
-            body["generationConfig"].pop("responseMimeType", None)
-            resp = await client.post(url, params=params, json=body)
-        resp.raise_for_status()
-        data = resp.json()
-    text = ""
-    try:
-        parts = data["candidates"][0]["content"]["parts"]
-        text = "".join(p.get("text", "") for p in parts if isinstance(p, dict)).strip()
-    except Exception:
-        text = ""
-    if not text:
-        raise RuntimeError(f"Empty Gemini response: {data!r}")
-    return LLMResponse(text=text, provider="gemini", model=model)
+        for model in models:
+            url = f"{settings.GEMINI_BASE_URL.rstrip('/')}/models/{model}:generateContent"
+            try:
+                resp = await client.post(url, params=params, json=body)
+                if resp.status_code >= 400:
+                    # Retry without JSON mime for older/stricter model endpoints.
+                    body_plain = {
+                        **body,
+                        "generationConfig": {
+                            k: v
+                            for k, v in body["generationConfig"].items()
+                            if k != "responseMimeType"
+                        },
+                    }
+                    resp = await client.post(url, params=params, json=body_plain)
+                if resp.status_code == 404:
+                    logger.warning("Gemini model unavailable: %s", model)
+                    last_error = httpx.HTTPStatusError(
+                        f"model {model} not found",
+                        request=resp.request,
+                        response=resp,
+                    )
+                    continue
+                resp.raise_for_status()
+                data = resp.json()
+            except Exception as exc:
+                last_error = exc
+                logger.warning("Gemini model %s failed: %s", model, exc)
+                continue
+
+            text = ""
+            try:
+                parts = data["candidates"][0]["content"]["parts"]
+                text = "".join(
+                    p.get("text", "") for p in parts if isinstance(p, dict)
+                ).strip()
+            except Exception:
+                text = ""
+            if not text:
+                last_error = RuntimeError(f"Empty Gemini response: {data!r}")
+                continue
+            return LLMResponse(text=text, provider="gemini", model=model)
+
+    if last_error:
+        raise last_error
+    raise RuntimeError("Gemini request failed for all configured models")
 
 
 async def _openai(prompt: str, *, system: Optional[str] = None) -> LLMResponse:

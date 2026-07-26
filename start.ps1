@@ -30,6 +30,27 @@ function Show-AegisBanner {
 }
 
 function Find-PythonLauncher {
+  # Prefer an existing project venv (already bootstrapped).
+  $venvPython = Join-Path $PSScriptRoot ".venv\Scripts\python.exe"
+  if (Test-Path $venvPython) {
+    try {
+      $major = & $venvPython -c "import sys; print(sys.version_info[0])" 2>$null
+      $minor = & $venvPython -c "import sys; print(sys.version_info[1])" 2>$null
+      if ($LASTEXITCODE -eq 0 -and $major -and $minor) {
+        $maj = [int]([string]$major).Trim()
+        $min = [int]([string]$minor).Trim()
+        if ($maj -gt 3 -or ($maj -eq 3 -and $min -ge 10)) {
+          return @{
+            Launcher = $venvPython
+            Args     = @()
+            Version  = "$maj.$min"
+            IsVenv   = $true
+          }
+        }
+      }
+    } catch { }
+  }
+
   $candidates = @(
     @{ Cmd = "py"; Args = @("-3.13") },
     @{ Cmd = "py"; Args = @("-3.12") },
@@ -38,22 +59,22 @@ function Find-PythonLauncher {
     @{ Cmd = "python"; Args = @() },
     @{ Cmd = "python3"; Args = @() }
   )
-  $pyCode = 'import sys; print("%d.%d" % (sys.version_info[0], sys.version_info[1]))'
+  # Avoid nested quotes: PowerShell strips them when invoking native -c.
   foreach ($c in $candidates) {
     if (-not (Get-Command $c.Cmd -ErrorAction SilentlyContinue)) { continue }
     try {
-      $ver = & $c.Cmd @($c.Args + @("-c", $pyCode)) 2>$null
-      if ($LASTEXITCODE -ne 0 -or -not $ver) { continue }
-      $ver = ([string]$ver).Trim()
-      $parts = $ver.Split(".")
-      if ($parts.Count -lt 2) { continue }
-      $major = [int]$parts[0]
-      $minor = [int]$parts[1]
-      if ($major -lt 3 -or ($major -eq 3 -and $minor -lt 10)) { continue }
+      $major = & $c.Cmd @($c.Args + @("-c", "import sys; print(sys.version_info[0])")) 2>$null
+      if (-not $major) { continue }
+      $minor = & $c.Cmd @($c.Args + @("-c", "import sys; print(sys.version_info[1])")) 2>$null
+      if (-not $minor) { continue }
+      $maj = [int]([string]$major).Trim()
+      $min = [int]([string]$minor).Trim()
+      if ($maj -lt 3 -or ($maj -eq 3 -and $min -lt 10)) { continue }
       return @{
         Launcher = $c.Cmd
         Args     = $c.Args
-        Version  = $ver
+        Version  = "$maj.$min"
+        IsVenv   = $false
       }
     } catch {
       continue
@@ -66,6 +87,20 @@ function Initialize-AegisVenv {
   param([hashtable]$Python, [switch]$Force)
   $venvPython = Join-Path $PSScriptRoot ".venv\Scripts\python.exe"
   $uvicornExe = Join-Path $PSScriptRoot ".venv\Scripts\uvicorn.exe"
+
+  # Already running via project venv python — only ensure uvicorn exists.
+  if ($Python.IsVenv -and -not $Force) {
+    if (-not (Test-Path $uvicornExe)) {
+      Write-Host "Installing dependencies from requirements.txt..." -ForegroundColor Yellow
+      & $venvPython -m pip install -U pip --quiet
+      & $venvPython -m pip install -r requirements.txt
+      if ($LASTEXITCODE -ne 0) { throw "pip install failed" }
+    }
+    if (-not (Test-Path $uvicornExe)) {
+      throw "uvicorn not found after install. Check requirements.txt"
+    }
+    return
+  }
 
   if ($Force -and (Test-Path ".\.venv")) {
     Write-Host "Removing existing .venv (Reinstall)..." -ForegroundColor Yellow

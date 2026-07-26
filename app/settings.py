@@ -45,8 +45,8 @@ class Settings(BaseSettings):
 
     # LLM
     LLM_BACKEND: str = "auto"  # auto|gemini|openai|ollama|mock
-    DEFAULT_MODEL: str = "gemini-2.0-flash"
-    FALLBACK_MODEL: str = "gemini-2.0-flash-lite"
+    DEFAULT_MODEL: str = "gemini-2.5-flash"
+    FALLBACK_MODEL: str = "gemini-flash-latest"
     LLM_TIMEOUT_SECONDS: float = 45.0
     LLM_MAX_OUTPUT_TOKENS: int = 2048
 

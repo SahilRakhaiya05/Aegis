@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Aegis Â· Incident desk</title>
-  <meta name="description" content="Aegis â€” SigNoz evidence, dual MCP, structured RCA." />
+  <title>Aegis · Incident desk</title>
+  <meta name="description" content="Aegis — SigNoz evidence, dual MCP, structured RCA." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap" rel="stylesheet" />
@@ -29,7 +29,7 @@
       <div class="rail-card" id="rail-stats">
         <div class="rc-k">Session</div>
         <div class="rc-v" id="rail-inv">0 probes</div>
-        <div class="rc-sub" id="rail-sev">â€”</div>
+        <div class="rc-sub" id="rail-sev">—</div>
       </div>
 
       <div class="rail-foot">
@@ -52,9 +52,9 @@
       </header>
 
       <div class="pipeline" id="pipeline" hidden aria-live="polite">
-        <div class="pipe-step" data-step="collect">1 Â· Collect</div>
-        <div class="pipe-step" data-step="reason">2 Â· Reason</div>
-        <div class="pipe-step" data-step="report">3 Â· Report</div>
+        <div class="pipe-step" data-step="collect">1 · Collect</div>
+        <div class="pipe-step" data-step="reason">2 · Reason</div>
+        <div class="pipe-step" data-step="report">3 · Report</div>
       </div>
 
       <div class="content">
@@ -63,7 +63,7 @@
             <div>
               <h2 class="display">See the signal.<br />Ship the fix.</h2>
               <p class="sub">
-                Aegis correlates SigNoz evidence through MCP, scores severity, and writes an actionable RCA â€”
+                Aegis correlates SigNoz evidence through MCP, scores severity, and writes an actionable RCA —
                 with Aegis MCP agents can call.
               </p>
               <div class="hero-actions">
@@ -75,7 +75,7 @@
             <div class="hero-side">
               <div class="stat-block">
                 <span class="sk">SigNoz instance</span>
-                <a id="instance-a" class="sv link" href="#" target="_blank" rel="noreferrer">â€”</a>
+                <a id="instance-a" class="sv link" href="#" target="_blank" rel="noreferrer">—</a>
               </div>
               <div class="stat-grid" id="home-stats"></div>
             </div>
@@ -153,7 +153,7 @@
               <p class="muted">Structured highlights + raw JSON from SigNoz MCP.</p>
               <button type="button" class="btn primary" id="btn-evidence-2">Fetch evidence</button>
               <div id="ev-highlights" class="chips"></div>
-              <pre id="evidence-out" class="code">â€”</pre>
+              <pre id="evidence-out" class="code">—</pre>
             </article>
             <article class="card">
               <div class="card-h"><h3>Workload</h3></div>
@@ -163,7 +163,7 @@
                 <label>Quantity <input id="order-qty" type="number" value="150" min="1" /></label>
                 <button type="submit" class="btn">Place order</button>
               </form>
-              <pre id="order-out" class="code short">â€”</pre>
+              <pre id="order-out" class="code short">—</pre>
               <div id="orders" class="list"></div>
             </article>
           </div>
@@ -175,9 +175,9 @@
             <p class="muted">Live calls export telemetry to SigNoz as <code>aegis</code>.</p>
             <div class="faults">
               <button type="button" class="fault" data-fault="error"><b>500</b><span>Downstream error</span></button>
-              <button type="button" class="fault" data-fault="latency"><b>Latency</b><span>2â€“5 second delay</span></button>
+              <button type="button" class="fault" data-fault="latency"><b>Latency</b><span>2–5 second delay</span></button>
               <button type="button" class="fault" data-fault="flaky"><b>Flaky</b><span>~50% 503</span></button>
-              <button type="button" class="fault" data-fault="storm"><b>Storm</b><span>Burst Ã—8</span></button>
+              <button type="button" class="fault" data-fault="storm"><b>Storm</b><span>Burst ×8</span></button>
             </div>
             <pre id="fault-out" class="code">Ready.</pre>
           </article>
@@ -188,9 +188,9 @@
             <article class="card mcp-card">
               <div class="card-h">
                 <h3>SigNoz MCP</h3>
-                <span class="pill" id="smcp-pill">â€”</span>
+                <span class="pill" id="smcp-pill">—</span>
               </div>
-              <p class="muted" id="smcp-url">â€”</p>
+              <p class="muted" id="smcp-url">—</p>
               <div class="row">
                 <button type="button" class="btn primary" id="btn-smcp">Load tools</button>
                 <a class="btn" id="smcp-open" href="#" target="_blank" rel="noreferrer">Open URL</a>
@@ -209,7 +209,7 @@
                 <a class="btn" href="/mcp" target="_blank" rel="noreferrer">Open /mcp</a>
               </div>
               <div id="pmcp-tools" class="list tall">Load Aegis MCP tools.</div>
-              <pre id="pmcp-sample" class="code short">POST /mcp Â· tools/call Â· aegis_investigate</pre>
+              <pre id="pmcp-sample" class="code short">POST /mcp · tools/call · aegis_investigate</pre>
             </article>
           </div>
         </section>
@@ -227,10 +227,10 @@
 
       <footer class="foot">
         <span id="foot-left">Aegis</span>
-        <span class="sep">Â·</span>
+        <span class="sep">·</span>
         <span id="foot-mid" class="mono">aegis</span>
-        <span class="sep">Â·</span>
-        <span id="foot-right" class="muted">â€”</span>
+        <span class="sep">·</span>
+        <span id="foot-right" class="muted">—</span>
       </footer>
     </div>
   </div>
