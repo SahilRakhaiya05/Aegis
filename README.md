@@ -59,6 +59,32 @@ Secrets only in `.env` (gitignored).
 
 ## Quick start
 
+**Windows (recommended)**
+
+```powershell
+.\start.ps1
+```
+
+**macOS / Linux / WSL**
+
+```bash
+chmod +x start.sh   # once
+./start.sh
+```
+
+The start script creates `.venv`, installs deps, copies `.env.example` → `.env` if needed, frees port 8000, and runs uvicorn with reload.
+
+Then edit `.env` with your SigNoz keys and open http://127.0.0.1:8000/
+
+| Flag | Meaning |
+|------|---------|
+| `-Port 8001` / `--port 8001` | Bind port |
+| `-NoReload` / `--no-reload` | Production-style (no file watch) |
+| `-Reinstall` / `--reinstall` | Recreate venv + reinstall deps |
+| `-SkipPortKill` / `--skip-port-kill` | Do not kill whatever holds the port |
+
+### Manual install
+
 ```powershell
 py -3.13 -m venv .venv
 .\.venv\Scripts\Activate.ps1
@@ -67,8 +93,6 @@ copy .env.example .env
 # set SIGNOZ_URL, SIGNOZ_API_KEY, OTEL headers
 uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
-
-Open http://127.0.0.1:8000/
 
 ### Docker
 
@@ -135,7 +159,7 @@ Legacy aliases under `/api/v1/incidents/*` and `/api/v1/orders` remain for older
 ## Layout
 
 ```text
-.agent/              agent workspace
+start.ps1 / start.sh one-command launcher
 app/                 FastAPI application
   mcp/               Aegis MCP server
   integrations/      SigNoz + reasoner

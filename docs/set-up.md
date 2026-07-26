@@ -5,7 +5,19 @@
 - Python 3.10+
 - SigNoz Cloud account (API key + ingestion key)
 
-## Install
+## Install & run (recommended)
+
+```powershell
+.\start.ps1
+```
+
+```bash
+./start.sh
+```
+
+Creates `.venv`, installs deps, seeds `.env` from `.env.example`, frees port 8000, starts the desk.
+
+### Manual install
 
 ```powershell
 py -3.13 -m venv .venv
@@ -33,6 +45,8 @@ OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
 ## Run
 
 ```powershell
+.\start.ps1
+# or:
 uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
