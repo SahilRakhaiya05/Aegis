@@ -31,10 +31,18 @@ function toast(msg) {
 function setFoot(msg) { $("#foot-right").textContent = msg; }
 
 async function api(path, opts = {}) {
-  const res = await fetch(path, {
-    headers: { "Content-Type": "application/json", ...(opts.headers || {}) },
-    ...opts,
-  });
+  let res;
+  try {
+    res = await fetch(path, {
+      headers: { "Content-Type": "application/json", ...(opts.headers || {}) },
+      ...opts,
+    });
+  } catch (err) {
+    // Browser "Failed to fetch" when server is down / CORS / network
+    throw new Error(
+      "Cannot reach Aegis API. Start the server:  uvicorn app.main:app --host 127.0.0.1 --port 8000  then refresh this page."
+    );
+  }
   const text = await res.text();
   let data;
   try { data = text ? JSON.parse(text) : {}; } catch { data = { raw: text }; }
